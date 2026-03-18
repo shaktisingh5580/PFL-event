@@ -543,3 +543,64 @@ aside::-webkit-scrollbar-thumb { background: rgba(168,85,247,0.2); border-radius
   0%, 100% { box-shadow: 0 0 0 0 rgba(168,85,247,0.4); }
   50%       { box-shadow: 0 0 0 6px rgba(168,85,247,0); }
 }
+
+/* ─── Spin animation (pipeline gear) ──────────────────── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ─── Premium Design System ─── */
+:root {
+  --p-purple: #a855f7;
+  --p-blue: #3b82f6;
+  --p-bg: #07070f;
+  --p-card: rgba(255, 255, 255, 0.03);
+  --p-border: rgba(255, 255, 255, 0.08);
+  --p-glow: rgba(168, 85, 247, 0.15);
+}
+
+.glass-premium {
+  background: var(--p-card);
+  backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--p-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-premium::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+}
+
+.glow-border {
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.1);
+}
+
+.glow-border-blue {
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #f3e8ff 0%, #a855f7 50%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.premium-card {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.premium-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: rgba(168, 85, 247, 0.4);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(168, 85, 247, 0.2);
+}
+
+

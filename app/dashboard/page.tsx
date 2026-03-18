@@ -156,8 +156,11 @@ export default function DashboardPage() {
     { icon: "👥", text: "Registration events will appear here", time: "—", color: "#3b82f6" },
   ];
 
+  // Demo chart data shown even without backend (realistic placeholder)
+  const DEMO_CHART = [12, 34, 67, 89, 102, 78, 55, 43, 28, 15];
+  const chartData = checkInData.length > 0 ? checkInData : DEMO_CHART;
+
   const feed = activities.length > 0 ? activities : defaultActivity;
-  const showChart = checkInData.length > 0;
 
   return (
     <div>
@@ -180,23 +183,24 @@ export default function DashboardPage() {
         <StatCard icon="🎓" label="Certificates Issued" value={stats.certificates} color="#10b981" loading={loading} />
       </div>
 
-      {/* Check-in chart (only if real data) */}
-      {showChart && (
-        <div className="glass" style={{ padding: 24, marginBottom: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-            <div>
-              <div className="section-title">📈 Check-In Trend</div>
-              <div className="section-subtitle">Hourly check-ins for today</div>
-            </div>
+      {/* Check-in chart — always shown (demo data when backend is offline) */}
+      <div className="glass-premium" style={{ padding: 24, marginBottom: 24, borderRadius: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+          <div>
+            <div className="section-title">📈 Check-In Trend</div>
+            <div className="section-subtitle">Hourly check-ins for today</div>
           </div>
-          <CheckInChart data={checkInData} />
+          {checkInData.length === 0 && (
+            <div className="badge badge-purple" style={{ fontSize: 11 }}>Demo Data</div>
+          )}
         </div>
-      )}
+        <CheckInChart data={chartData} />
+      </div>
 
       {/* Bot + Scheduler row */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
         {/* Bot card */}
-        <div className="glass" style={{ padding: 24 }}>
+        <div className="glass-premium" style={{ padding: 24, borderRadius: 20 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
             <div>
               <div className="section-title">🤖 Telegram Bot</div>
@@ -220,7 +224,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Scheduler card */}
-        <div className="glass" style={{ padding: 24 }}>
+        <div className="glass-premium" style={{ padding: 24, borderRadius: 20 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
             <div>
               <div className="section-title">📅 Scheduler</div>
@@ -247,7 +251,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Activity */}
-      <div className="glass" style={{ padding: 24 }}>
+      <div className="glass-premium" style={{ padding: 24, borderRadius: 20 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
           <div>
             <div className="section-title">⚡ Recent Activity</div>

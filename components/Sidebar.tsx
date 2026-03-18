@@ -9,6 +9,7 @@ const NAV_SECTIONS = [
     items: [
       { href: "/dashboard",            icon: "📊", label: "Dashboard" },
       { href: "/dashboard/planner",    icon: "🎓", label: "Event Planner" },
+      { href: "/dashboard/plan",       icon: "📋", label: "Plan Editor" },
       { href: "/dashboard/attendees",  icon: "👥", label: "Attendees" },
       { href: "/dashboard/schedule",   icon: "📅", label: "Schedule" },
     ],

@@ -1,5 +1,6 @@
 import { Sidebar } from "@/components/Sidebar";
 import { Topbar } from "@/components/Topbar";
+import { BotPill } from "@/components/BotPill";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -40,6 +41,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Topbar />
           {children}
         </div>
+
+        {/* Floating bot pill — visible on every dashboard page */}
+        <BotPill />
       </main>
     </div>
   );

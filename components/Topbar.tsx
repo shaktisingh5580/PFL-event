@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 const PAGE_META: Record<string, { label: string; icon: string; desc: string }> = {
   "/dashboard":              { label: "Dashboard",        icon: "📊", desc: "Real-time event health overview" },
   "/dashboard/planner":      { label: "Event Planner",    icon: "🎓", desc: "AI-powered event architecture" },
+  "/dashboard/plan":         { label: "Plan Editor",      icon: "📋", desc: "View and edit your finalized event plan" },
   "/dashboard/website":      { label: "Website Builder",  icon: "🌐", desc: "Design & deploy your event site" },
   "/dashboard/branding":     { label: "Branding",         icon: "🎨", desc: "Generate posters and QR codes" },
   "/dashboard/sponsors":     { label: "Sponsors",         icon: "🤝", desc: "Outreach, emails & call lists" },

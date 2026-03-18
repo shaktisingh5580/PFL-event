@@ -2,24 +2,25 @@
 
 import { useState } from "react";
 import { useToast } from "@/components/ToastProvider";
+import { createClient } from "@/lib/supabase-browser";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
+  const supabase = createClient();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await new Promise(r => setTimeout(r, 1000));
-      if (email && password) {
-        showToast("Logged in successfully!", "success");
-        window.location.href = "/dashboard";
-      } else {
-        showToast("Please enter email and password", "error");
-      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      showToast("Logged in successfully!", "success");
+      window.location.href = "/dashboard";
+    } catch (err: any) {
+      showToast(err.message || "Login failed", "error");
     } finally {
       setLoading(false);
     }

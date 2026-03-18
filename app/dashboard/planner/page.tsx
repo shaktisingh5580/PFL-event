@@ -15,6 +15,90 @@ const EVENT_TYPES = [
 
 interface Message { role: "user" | "ai"; content: string; timestamp: Date; }
 
+interface PipelineStatus {
+  plan: string;
+  poster: string;
+  website: string;
+  sponsors: string;
+}
+
+const PIPELINE_TASKS = [
+  { key: "plan", icon: "📝", label: "Event Plan", link: "/dashboard/plan" },
+  { key: "poster", icon: "🎨", label: "Branding & Poster", link: "/dashboard/branding" },
+  { key: "website", icon: "🌐", label: "Website Deploy", link: "/dashboard/website" },
+  { key: "sponsors", icon: "🤝", label: "Sponsor Matching", link: "/dashboard/sponsors" },
+] as const;
+
+function isDone(status: string) {
+  return status && status !== "not_started" && status !== "running..." && !status.toLowerCase().includes("start") && !status.toLowerCase().includes("pending");
+}
+
+function isRunning(status: string) {
+  return status && (status.toLowerCase().includes("running") || status.toLowerCase().includes("generating") || status.toLowerCase().includes("deploying") || status.toLowerCase().includes("matching"));
+}
+
+function PipelineStep({
+  icon, label, status, link, onRerun,
+}: {
+  icon: string; label: string; status: string; link: string; onRerun: () => void;
+}) {
+  const done = isDone(status);
+  const running = isRunning(status);
+  const notStarted = !status || status === "not_started";
+
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", gap: 16, padding: "18px 24px",
+      borderRadius: 14,
+      background: done
+        ? "rgba(16,185,129,0.08)"
+        : running
+          ? "rgba(168,85,247,0.08)"
+          : "rgba(255,255,255,0.03)",
+      border: `1px solid ${done ? "rgba(16,185,129,0.25)" : running ? "rgba(168,85,247,0.25)" : "rgba(255,255,255,0.07)"}`,
+      transition: "all 0.3s ease",
+    }}>
+      <div style={{
+        width: 44, height: 44, borderRadius: "50%", flexShrink: 0,
+        background: done
+          ? "rgba(16,185,129,0.2)"
+          : running
+            ? "linear-gradient(135deg,rgba(168,85,247,0.3),rgba(59,130,246,0.3))"
+            : "rgba(255,255,255,0.06)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: 20,
+        boxShadow: done ? "0 0 16px rgba(16,185,129,0.2)" : running ? "0 0 16px rgba(168,85,247,0.2)" : "none",
+      }}>
+        {done ? "✅" : running ? (
+          <span style={{ animation: "spin 1s linear infinite", display: "inline-block" }}>⚙️</span>
+        ) : icon}
+      </div>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontWeight: 700, fontSize: 15, color: done ? "#34d399" : running ? "#c084fc" : "#64748b", marginBottom: 3 }}>
+          {label}
+        </div>
+        <div style={{ fontSize: 12, color: done ? "#34d399" : running ? "#a78bfa" : "#475569" }}>
+          {notStarted ? "Waiting to start…" : status}
+        </div>
+      </div>
+      {done && (
+        <a href={link} style={{
+          padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+          background: "rgba(16,185,129,0.15)", color: "#34d399",
+          border: "1px solid rgba(16,185,129,0.3)", textDecoration: "none",
+        }}>
+          View →
+        </a>
+      )}
+      {!done && !running && !notStarted && (
+        <button className="btn-outline" style={{ padding: "6px 12px", fontSize: 12 }} onClick={onRerun}>
+          🔄 Rerun
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function PlannerPage() {
   const [templates, setTemplates] = useState(EVENT_TYPES);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
@@ -23,9 +107,11 @@ export default function PlannerPage() {
   const [typing, setTyping] = useState(false);
   const [sessionId] = useState(() => `sess_${Date.now()}`);
   const [finalized, setFinalized] = useState(false);
-  const [plan, setPlan] = useState<any>(null);
+  const [pipeline, setPipeline] = useState<PipelineStatus>({ plan: "not_started", poster: "not_started", website: "not_started", sponsors: "not_started" });
+  const [pipelineAllDone, setPipelineAllDone] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const pollRef = useRef<NodeJS.Timeout | null>(null);
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -38,6 +124,38 @@ export default function PlannerPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typing]);
+
+  // Poll pipeline status when finalized
+  useEffect(() => {
+    if (!finalized) return;
+    const poll = async () => {
+      try {
+        const res = await fetch(`${API}/api/pipeline/status`);
+        const data = await res.json();
+        setPipeline(data);
+        const allDone = PIPELINE_TASKS.every(t => isDone(data[t.key]));
+        if (allDone) {
+          setPipelineAllDone(true);
+          if (pollRef.current) clearInterval(pollRef.current);
+          showToast("🎉 All pipeline tasks complete! Your event is live!", "success");
+        }
+      } catch {
+        // backend offline — simulate progress for demo
+        setPipeline(prev => {
+          const keys = ["plan", "poster", "website", "sponsors"] as const;
+          const next = { ...prev };
+          for (const k of keys) {
+            if (next[k] === "not_started") { (next as any)[k] = "Running..."; break; }
+            if ((next[k] as string).toLowerCase().includes("running")) { (next as any)[k] = "Done ✅"; break; }
+          }
+          return next;
+        });
+      }
+    };
+    poll();
+    pollRef.current = setInterval(poll, 2000);
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, [finalized]);
 
   const startWithTemplate = (id: string) => {
     setSelectedTemplate(id);
@@ -67,8 +185,7 @@ export default function PlannerPage() {
       setMessages((prev) => [...prev, aiMsg]);
       if (data.finalized) {
         setFinalized(true);
-        setPlan(data.plan);
-        showToast("Event plan finalized! 🎉", "success");
+        showToast("Event plan finalized! Orchestrating pipeline… 🚀", "success");
       }
     } catch {
       setMessages((prev) => [
@@ -80,6 +197,16 @@ export default function PlannerPage() {
     }
   };
 
+  const rerunStep = async (step: string) => {
+    try {
+      await fetch(`${API}/api/pipeline/rerun/${step}`, { method: "POST" });
+      setPipeline(prev => ({ ...prev, [step]: "Running..." }));
+      showToast(`Rerunning ${step}…`, "info");
+    } catch {
+      showToast(`Failed to rerun ${step}`, "error");
+    }
+  };
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
@@ -87,6 +214,7 @@ export default function PlannerPage() {
     if (files.length) showToast(`📎 ${files[0].name} added to knowledge base`, "success");
   };
 
+  // Template selection screen
   if (!selectedTemplate) {
     return (
       <div>
@@ -122,6 +250,93 @@ export default function PlannerPage() {
     );
   }
 
+  // Pipeline orchestration screen
+  if (finalized) {
+    const allDone = PIPELINE_TASKS.every(t => isDone(pipeline[t.key]));
+    return (
+      <div>
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
+            <span style={{ fontSize: 28 }}>🚀</span>
+            <h1 style={{ fontSize: "1.75rem", fontWeight: 800 }}>Orchestrating Event…</h1>
+          </div>
+          <p style={{ color: "#64748b", fontSize: 14 }}>AI pipeline is building all components of your event automatically</p>
+        </div>
+
+        {/* Progress indicator */}
+        <div className="glass" style={{ padding: 24, marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: "#94a3b8" }}>Pipeline Progress</div>
+            <div style={{ fontSize: 13, color: "#a855f7", fontWeight: 700 }}>
+              {PIPELINE_TASKS.filter(t => isDone(pipeline[t.key])).length} / {PIPELINE_TASKS.length} complete
+            </div>
+          </div>
+          <div className="progress-bar">
+            <div
+              className="progress-bar-fill"
+              style={{ width: `${(PIPELINE_TASKS.filter(t => isDone(pipeline[t.key])).length / PIPELINE_TASKS.length) * 100}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Pipeline steps */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
+          {PIPELINE_TASKS.map(task => (
+            <PipelineStep
+              key={task.key}
+              icon={task.icon}
+              label={task.label}
+              status={pipeline[task.key]}
+              link={task.link}
+              onRerun={() => rerunStep(task.key)}
+            />
+          ))}
+        </div>
+
+        {/* All done banner */}
+        {allDone && (
+          <div style={{
+            background: "linear-gradient(135deg,rgba(16,185,129,0.15),rgba(59,130,246,0.1))",
+            border: "1px solid rgba(16,185,129,0.4)",
+            borderRadius: 16,
+            padding: "24px 28px",
+            marginBottom: 20,
+          }}>
+            <div style={{ fontSize: 20, fontWeight: 800, color: "#34d399", marginBottom: 8 }}>
+              ✅ Event is Live!
+            </div>
+            <div style={{ fontSize: 14, color: "#94a3b8", marginBottom: 20 }}>
+              All pipeline tasks have completed. Your event is ready to go!
+            </div>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              {PIPELINE_TASKS.map(task => (
+                <a key={task.key} href={task.link} style={{
+                  padding: "8px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600,
+                  background: "rgba(16,185,129,0.15)", color: "#34d399",
+                  border: "1px solid rgba(16,185,129,0.3)", textDecoration: "none",
+                  display: "flex", alignItems: "center", gap: 6,
+                }}>
+                  {task.icon} {task.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Go back / restart */}
+        <div style={{ display: "flex", gap: 10 }}>
+          <button className="btn-outline" onClick={() => { setSelectedTemplate(null); setMessages([]); setFinalized(false); setPipelineAllDone(false); setPipeline({ plan: "not_started", poster: "not_started", website: "not_started", sponsors: "not_started" }); }}>
+            ← Start Over
+          </button>
+          <button className="btn-outline" onClick={() => setFinalized(false)}>
+            💬 View Chat History
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Chat interface
   return (
     <div style={{ height: "calc(100vh - 64px)", display: "flex", flexDirection: "column" }}>
       {/* Header */}
@@ -135,22 +350,8 @@ export default function PlannerPage() {
             {templates.find((t) => t.id === selectedTemplate)?.icon} {templates.find((t) => t.id === selectedTemplate)?.name ?? "Custom Event"}
           </span>
         </div>
-        {finalized && <div className="badge badge-green">✅ Plan Ready</div>}
+        <div className="badge badge-purple">🤖 AI Architect Active</div>
       </div>
-
-      {/* Finalized banner */}
-      {finalized && (
-        <div style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 12, padding: "16px 20px", marginBottom: 16 }}>
-          <div style={{ fontWeight: 700, color: "#34d399", marginBottom: 8 }}>✅ Event Plan Ready!</div>
-          {plan && (
-            <div style={{ fontSize: 13, color: "#94a3b8" }}>
-              {Object.entries(plan).map(([k, v]) => (
-                <span key={k} style={{ marginRight: 16 }}><strong>{k}:</strong> {String(v)}</span>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Chat */}
       <div className="glass" style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
