@@ -15,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body style={{ background: "#07070f", minHeight: "100vh" }}>
+      <body style={{ background: "#07070f", minHeight: "100vh" }} suppressHydrationWarning>
         <ToastProvider>
           {children}
           <BotPill />
