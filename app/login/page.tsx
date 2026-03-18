@@ -15,6 +15,15 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
+      // 🚀 Demo Bypass for user convenience
+      if (email === "demo@pfl.events" && password === "demo1234") {
+        showToast("Logged in with Demo Access", "success");
+        // Store a fake session for middleware/client-side checks if needed
+        localStorage.setItem("p-demo-auth", "true");
+        window.location.href = "/dashboard";
+        return;
+      }
+
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       showToast("Logged in successfully!", "success");
@@ -25,6 +34,7 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
 
   const demoLogin = () => {
     setEmail("demo@pfl.events");
