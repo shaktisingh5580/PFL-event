@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { createClient } from "@/lib/supabase-browser";
 
 const NAV_SECTIONS = [
   {
@@ -40,18 +39,10 @@ const NAV_SECTIONS = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const supabase = createClient();
 
   const isActive = (href: string) => {
     if (href === "/dashboard") return pathname === "/dashboard";
     return pathname.startsWith(href);
-  };
-
-  const handleLogout = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    localStorage.removeItem("p-demo-auth");
-    await supabase.auth.signOut();
-    window.location.href = "/login";
   };
 
   return (
@@ -136,10 +127,6 @@ export function Sidebar() {
           <span style={{ fontSize: 16 }}>⚙️</span>
           <span>Settings</span>
         </Link>
-        <button onClick={handleLogout} className="sidebar-item" style={{ color: "#f87171", background: "none", border: "none", width: "100%", textAlign: "left", cursor: "pointer", fontFamily: "inherit" }}>
-          <span style={{ fontSize: 16 }}>🚪</span>
-          <span>Logout</span>
-        </button>
       </div>
     </aside>
   );
