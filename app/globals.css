@@ -427,3 +427,119 @@ select.input-glass { appearance: none; cursor: pointer; }
   background: linear-gradient(90deg, transparent, rgba(168,85,247,0.4), transparent);
   margin: 4px 0;
 }
+
+/* ─── Page fade-in ─────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+main > div > *:not(header) {
+  animation: fadeUp 0.35s ease both;
+}
+
+/* ─── Enhanced glass hover ─────────────────────────────── */
+.glass-hover:hover {
+  background: rgba(255,255,255,0.055);
+  border-color: rgba(168,85,247,0.35);
+  box-shadow: 0 0 28px rgba(168,85,247,0.13), 0 8px 32px rgba(0,0,0,0.3);
+  transform: translateY(-1px);
+}
+.glass-hover { transition: all 0.2s ease; }
+
+/* ─── Sidebar item – active pulse dot position ─────────── */
+.sidebar-item.active {
+  background: linear-gradient(90deg, rgba(168,85,247,0.15), rgba(59,130,246,0.08));
+  color: #c084fc;
+  border: 1px solid rgba(168,85,247,0.25);
+  box-shadow: inset 0 0 20px rgba(168,85,247,0.05);
+}
+
+/* ─── Button disabled opacity ──────────────────────────── */
+.btn-danger:disabled  { opacity: 0.45; cursor: not-allowed; }
+.btn-success:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ─── Input focus ring ─────────────────────────────────── */
+.input-glass:focus {
+  border-color: rgba(168,85,247,0.6);
+  box-shadow: 0 0 0 3px rgba(168,85,247,0.12), 0 0 12px rgba(168,85,247,0.08);
+}
+
+/* ─── Login page animated orbs ─────────────────────────── */
+.login-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  animation: orbFloat 8s ease-in-out infinite;
+}
+.login-orb-1 {
+  width: 500px; height: 500px;
+  top: -150px; left: -150px;
+  background: radial-gradient(circle, rgba(168,85,247,0.18), transparent 70%);
+  animation-duration: 10s;
+}
+.login-orb-2 {
+  width: 400px; height: 400px;
+  bottom: -100px; right: -100px;
+  background: radial-gradient(circle, rgba(59,130,246,0.15), transparent 70%);
+  animation-duration: 8s;
+  animation-delay: -4s;
+}
+.login-orb-3 {
+  width: 300px; height: 300px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(168,85,247,0.06), transparent 70%);
+  animation-duration: 6s;
+  animation-delay: -2s;
+}
+@keyframes orbFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-30px) scale(1.05); }
+}
+.login-orb-3 {
+  animation-name: orbFloat3;
+}
+@keyframes orbFloat3 {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50%       { transform: translate(-50%, -55%) scale(1.08); }
+}
+
+/* ─── Login grid texture ───────────────────────────────── */
+.login-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(168,85,247,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(168,85,247,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+}
+
+/* ─── Stat card entrance stagger ──────────────────────── */
+.stats-grid > *:nth-child(1) { animation-delay: 0.05s; }
+.stats-grid > *:nth-child(2) { animation-delay: 0.10s; }
+.stats-grid > *:nth-child(3) { animation-delay: 0.15s; }
+.stats-grid > *:nth-child(4) { animation-delay: 0.20s; }
+
+/* ─── Scrollbar – sidebar ──────────────────────────────── */
+aside::-webkit-scrollbar { width: 3px; }
+aside::-webkit-scrollbar-thumb { background: rgba(168,85,247,0.2); border-radius: 2px; }
+
+/* ─── Table row hover ──────────────────────────────────── */
+.data-table tbody tr {
+  transition: background 0.12s ease;
+}
+.data-table tbody tr:hover td {
+  background: rgba(168,85,247,0.04);
+}
+
+/* ─── Badge pulse for LIVE ─────────────────────────────── */
+.badge-live {
+  animation: badgePulse 2s ease-in-out infinite;
+}
+@keyframes badgePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(168,85,247,0.4); }
+  50%       { box-shadow: 0 0 0 6px rgba(168,85,247,0); }
+}

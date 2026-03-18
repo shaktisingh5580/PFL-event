@@ -13,7 +13,6 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      // In production: use @supabase/ssr for auth
       await new Promise(r => setTimeout(r, 1000));
       if (email && password) {
         showToast("Logged in successfully!", "success");
@@ -26,6 +25,12 @@ export default function LoginPage() {
     }
   };
 
+  const demoLogin = () => {
+    setEmail("demo@pfl.events");
+    setPassword("demo1234");
+    showToast("Demo credentials filled!", "info");
+  };
+
   return (
     <div style={{
       minHeight: "100vh",
@@ -36,25 +41,44 @@ export default function LoginPage() {
       position: "relative",
       overflow: "hidden",
     }}>
-      {/* Background glows */}
-      <div style={{ position:"absolute", top:-200, left:-200, width:600, height:600, borderRadius:"50%", background:"radial-gradient(circle, rgba(168,85,247,0.12) 0%, transparent 70%)", pointerEvents:"none" }}/>
-      <div style={{ position:"absolute", bottom:-200, right:-200, width:600, height:600, borderRadius:"50%", background:"radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%)", pointerEvents:"none" }}/>
+      {/* Animated orbs */}
+      <div className="login-orb login-orb-1" />
+      <div className="login-orb login-orb-2" />
+      <div className="login-orb login-orb-3" />
 
-      <div style={{ width:"100%", maxWidth:420, padding:20 }}>
+      {/* Grid overlay */}
+      <div className="login-grid" />
+
+      <div style={{ width: "100%", maxWidth: 440, padding: 20, position: "relative", zIndex: 2 }}>
         {/* Logo */}
-        <div style={{ textAlign:"center", marginBottom:40 }}>
-          <div className="gradient-text" style={{ fontSize:48, fontWeight:900, letterSpacing:-2 }}>PFL</div>
-          <div style={{ fontSize:14, color:"#64748b", marginTop:4 }}>Manage Events. Effortlessly.</div>
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div style={{
+            width: 64, height: 64, borderRadius: 18,
+            background: "linear-gradient(135deg, #a855f7, #3b82f6)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontWeight: 900, fontSize: 26, color: "white",
+            margin: "0 auto 16px",
+            boxShadow: "0 0 40px rgba(168,85,247,0.5), 0 0 80px rgba(168,85,247,0.15)",
+          }}>P</div>
+          <div className="gradient-text" style={{ fontSize: 36, fontWeight: 900, letterSpacing: -1.5, lineHeight: 1 }}>PFL</div>
+          <div style={{ fontSize: 13, color: "#475569", marginTop: 6, letterSpacing: 0.3 }}>Manage Events. Effortlessly.</div>
         </div>
 
         {/* Card */}
-        <div className="glass" style={{ padding:40 }}>
-          <div style={{ fontWeight:700, fontSize:22, marginBottom:6 }}>Welcome back</div>
-          <div style={{ fontSize:13, color:"#64748b", marginBottom:28 }}>Sign in to your organizer account</div>
+        <div style={{
+          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: 24,
+          padding: 40,
+          backdropFilter: "blur(30px)",
+          boxShadow: "0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(168,85,247,0.1)",
+        }}>
+          <div style={{ fontWeight: 800, fontSize: 22, marginBottom: 4 }}>Welcome back 👋</div>
+          <div style={{ fontSize: 13, color: "#64748b", marginBottom: 28 }}>Sign in to your organizer account</div>
 
-          <form onSubmit={handleLogin} style={{ display:"flex", flexDirection:"column", gap:16 }}>
+          <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div>
-              <label style={{ fontSize:12, fontWeight:600, color:"#64748b", display:"block", marginBottom:6 }}>Email</label>
+              <label style={{ fontSize: 12, fontWeight: 600, color: "#64748b", display: "block", marginBottom: 6 }}>Email address</label>
               <input
                 className="input-glass"
                 type="email"
@@ -62,10 +86,14 @@ export default function LoginPage() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
+                style={{ fontSize: 15 }}
               />
             </div>
             <div>
-              <label style={{ fontSize:12, fontWeight:600, color:"#64748b", display:"block", marginBottom:6 }}>Password</label>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: "#64748b" }}>Password</label>
+                <span style={{ fontSize: 12, color: "#a855f7", cursor: "pointer" }}>Forgot?</span>
+              </div>
               <input
                 className="input-glass"
                 type="password"
@@ -73,30 +101,48 @@ export default function LoginPage() {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
+                style={{ fontSize: 15 }}
               />
             </div>
+
             <button
               type="submit"
               className="btn-gradient"
               disabled={loading}
-              style={{ justifyContent:"center", padding:"14px 20px", marginTop:8, fontSize:15 }}
+              style={{ justifyContent: "center", padding: "14px 20px", marginTop: 4, fontSize: 15, borderRadius: 12 }}
             >
               {loading ? (
-                <span style={{ display:"flex", gap:8, alignItems:"center" }}>
-                  <div className="typing-dot"/><div className="typing-dot"/><div className="typing-dot"/>
+                <span style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <div className="typing-dot" /><div className="typing-dot" /><div className="typing-dot" />
                   Signing in…
                 </span>
               ) : "Sign In →"}
             </button>
           </form>
 
-          <div style={{ marginTop:24, textAlign:"center", fontSize:12, color:"#475569" }}>
-            Protected by Supabase Auth • RLS enforced
+          {/* Divider */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "20px 0" }}>
+            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.07)" }} />
+            <span style={{ fontSize: 12, color: "#334155" }}>or</span>
+            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.07)" }} />
+          </div>
+
+          <button
+            type="button"
+            onClick={demoLogin}
+            className="btn-outline"
+            style={{ width: "100%", justifyContent: "center", padding: "12px 20px", fontSize: 14 }}
+          >
+            🚀 Use Demo Credentials
+          </button>
+
+          <div style={{ marginTop: 24, textAlign: "center", fontSize: 11, color: "#334155" }}>
+            🔒 Protected by Supabase Auth · RLS enforced
           </div>
         </div>
 
-        <div style={{ textAlign:"center", marginTop:24, fontSize:12, color:"#334155" }}>
-          PFL Event Management v1.0 • &copy; {new Date().getFullYear()}
+        <div style={{ textAlign: "center", marginTop: 24, fontSize: 11, color: "#1e293b" }}>
+          PFL Event Management v1.0 · © {new Date().getFullYear()}
         </div>
       </div>
     </div>
